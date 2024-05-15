@@ -1,0 +1,11 @@
+{
+  "name": "key_ring_backend_api",
+  "version": "1.0.0",
+  "description": "Express project for my contact manager web app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
