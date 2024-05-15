@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const { getContact, createContact } = require('../controllers/contactController');
 
-router.route('/').get((req, res) => {
-    res.status(200).json({ success: true, msg: 'Show all contacts' });
-});
+router.route('/').get(getContact).post(createContact);
+
 
 module.exports = router;
