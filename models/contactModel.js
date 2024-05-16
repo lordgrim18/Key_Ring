@@ -13,10 +13,6 @@ const contactSchema = new mongoose.Schema({
             type: String,
             required: [true, 'Phone is required']
         },
-        created_at: {
-            type: Date,
-            default: Date.now
-        }
     }, 
     {
         timestamps: true
