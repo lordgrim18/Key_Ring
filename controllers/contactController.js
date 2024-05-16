@@ -1,15 +1,17 @@
+const asyncHandler = require('express-async-handler');
+
 // @desc Get all contacts
 // @route GET /api/v1/contacts
 // @access Public
 
-const getContact = (req, res) => {
+const getContact = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, msg: 'Show all contacts' });
-};
+});
 
 // @desc Create a contact
 // @route POST /api/v1/contacts
 // @access Public
-const createContact = (req, res) => {
+const createContact = asyncHandler(async (req, res) => {
     console.log(req.body);
     const { name, email, phone } = req.body;
     if (!name || !email || !phone) {
@@ -17,6 +19,6 @@ const createContact = (req, res) => {
         throw new Error('Please fill all fields!!');
     }
     res.status(201).json({ success: true, msg: 'Create new contact' });
-};
+});
 
 module.exports = { getContact, createContact };
