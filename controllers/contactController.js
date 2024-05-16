@@ -45,7 +45,6 @@ const getContactById = asyncHandler(async (req, res) => {
 // @route PUT /api/v1/contacts/:id
 // @access Public
 
-//edit the below code so that request body can be empty and can update only the fields that are passed
 const updateContact = asyncHandler(async (req, res) => {
     const { name, email, phone } = req.body;
     const contact = await Contact.findById(req.params.id);
@@ -61,11 +60,27 @@ const updateContact = asyncHandler(async (req, res) => {
     const updatedContact = await contact.save();
     res.status(200).json({ success: true, msg: 'Updated contact', data: updatedContact });
 });
-  
+
+// @desc Delete a contact
+// @route DELETE /api/v1/contacts/:id
+// @access Public
+
+const deleteContact = asyncHandler(async (req, res) => {
+    const contact = await Contact.findById(req.params.id);
+    if (!contact) {
+        res.status(404);
+        throw new Error('Contact not found');
+    }
+
+    await Contact.deleteOne({ _id: req.params.id });
+    res.status(200).json({ success: true, msg: 'Contact removed', data: contact});
+});
+
 
 module.exports = { 
     getContact, 
     createContact,
     getContactById,
     updateContact,
+    deleteContact
 };
