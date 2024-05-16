@@ -41,9 +41,31 @@ const getContactById = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, msg: 'Show contact', data: contact });
 });
 
+// @desc Update a contact
+// @route PUT /api/v1/contacts/:id
+// @access Public
+
+//edit the below code so that request body can be empty and can update only the fields that are passed
+const updateContact = asyncHandler(async (req, res) => {
+    const { name, email, phone } = req.body;
+    const contact = await Contact.findById(req.params.id);
+    if (!contact) {
+        res.status(404);
+        throw new Error('Contact not found');
+    }
+
+    contact.name = name || contact.name;
+    contact.email = email || contact.email;
+    contact.phone = phone || contact.phone;
+
+    const updatedContact = await contact.save();
+    res.status(200).json({ success: true, msg: 'Updated contact', data: updatedContact });
+});
+  
 
 module.exports = { 
     getContact, 
     createContact,
     getContactById,
+    updateContact,
 };
