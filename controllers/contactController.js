@@ -3,16 +3,18 @@ const Contact = require('../models/contactModel');
 
 // @desc Get all contacts
 // @route GET /api/v1/contacts
-// @access Public
+// @access private
 
 const getContact = asyncHandler(async (req, res) => {
-    const contacts = await Contact.find();
+    const contacts = await Contact.find(
+        { created_by: req.user.id }
+    );
     res.status(200).json({ success: true, msg: 'Show all contacts', data: contacts });
 });
 
 // @desc Create a contact
 // @route POST /api/v1/contacts
-// @access Public
+// @access private
 const createContact = asyncHandler(async (req, res) => {
     const { name, email, phone } = req.body;
     if (!name || !email || !phone) {
@@ -23,7 +25,8 @@ const createContact = asyncHandler(async (req, res) => {
     const contact = await Contact.create({
         name,
         email,
-        phone
+        phone,
+        created_by: req.user.id
     });
     res.status(201).json({ success: true, msg: 'Created new contact', data: contact});
 });
@@ -31,19 +34,23 @@ const createContact = asyncHandler(async (req, res) => {
 
 // @desc Get a contact
 // @route GET /api/v1/contacts/:id
-// @access Public
+// @access private
 const getContactById = asyncHandler(async (req, res) => {
     const contact = await Contact.findById(req.params.id);
     if (!contact) {
         res.status(404);
         throw new Error('Contact not found');
     }
+    if (contact.created_by.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User dont have access to other users contacts');
+    }
     res.status(200).json({ success: true, msg: 'Show contact', data: contact });
 });
 
 // @desc Update a contact
 // @route PUT /api/v1/contacts/:id
-// @access Public
+// @access private
 
 const updateContact = asyncHandler(async (req, res) => {
     const { name, email, phone } = req.body;
@@ -51,6 +58,11 @@ const updateContact = asyncHandler(async (req, res) => {
     if (!contact) {
         res.status(404);
         throw new Error('Contact not found');
+    }
+
+    if (contact.created_by.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User dont have access to other users contacts');
     }
 
     contact.name = name || contact.name;
@@ -63,13 +75,18 @@ const updateContact = asyncHandler(async (req, res) => {
 
 // @desc Delete a contact
 // @route DELETE /api/v1/contacts/:id
-// @access Public
+// @access private
 
 const deleteContact = asyncHandler(async (req, res) => {
     const contact = await Contact.findById(req.params.id);
     if (!contact) {
         res.status(404);
         throw new Error('Contact not found');
+    }
+
+    if (contact.created_by.toString() !== req.user.id) {
+        res.status(401);
+        throw new Error('User dont have access to other users contacts');
     }
 
     await Contact.deleteOne({ _id: req.params.id });
