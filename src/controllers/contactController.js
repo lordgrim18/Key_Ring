@@ -6,13 +6,15 @@ const Contact = require('../models/contactModel');
 // @access private
 
 const getContact = asyncHandler(async (req, res) => {
-    const { search, sortBy, orderBy } = req.query;
+    const { search, sortBy, orderBy, page = 1, limit = 10 } = req.query;
+
     let filter = { created_by: req.user.id };
   
     // Search by part of the name (case-insensitive)
     if (search) {
       filter.name = { $regex: new RegExp(search, 'i') };
     }
+  
     // Add sort functionality
     let sort = {};
     if (sortBy && orderBy) {
@@ -21,9 +23,24 @@ const getContact = asyncHandler(async (req, res) => {
       sort = { createdAt: -1 }; // Default sort by creation date (descending)
     }
   
-    const contacts = await Contact.find(filter, null, { sort });
-    res.status(200).json({ success: true, msg: 'Show all contacts', data: contacts });
+    // Pagination options
+    const skip = (page - 1) * limit;
+  
+    const contacts = await Contact.find(filter, null, { sort, skip, limit });
+    const totalContacts = await Contact.countDocuments(filter); // Count total contacts
+  
+    res.status(200).json({
+      success: true,
+      msg: 'Show all contacts',
+      data: contacts,
+      pagination: {
+        page,
+        limit,
+        totalPages: Math.ceil(totalContacts / limit),
+      },
+    });
   });
+  
 
 // @desc Create a contact
 // @route POST /api/v1/contacts
