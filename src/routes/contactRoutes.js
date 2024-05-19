@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { checkSchema } = require('express-validator');
 const { 
     getContact, 
     createContact,
@@ -8,10 +9,34 @@ const {
     deleteContact
 } = require('../controllers/contactController');
 const validateToken = require('../middleware/validateTokenHandler');
+const { 
+    getContactsSchema,
+    ContactSchema,
+} = require('../schemas/contactSchema');
+const handleValidationErrors = require('../middleware/validateSchema');
 
 router.use(validateToken);
-router.route('/').get(getContact).post(createContact);
-router.route("/:id").get(getContactById).put(updateContact).delete(deleteContact);
+router
+  .route('/')
+  .get(
+    checkSchema(getContactsSchema, ['query']),
+    handleValidationErrors,
+    getContact
+  )
+  .post(
+    checkSchema(ContactSchema),
+    handleValidationErrors,
+    createContact
+  );
+router
+    .route("/:id")
+    .get(getContactById)
+    .put(
+        checkSchema(ContactSchema),
+        handleValidationErrors,
+        updateContact
+    )
+    .delete(deleteContact);
 
 
 module.exports = router;
