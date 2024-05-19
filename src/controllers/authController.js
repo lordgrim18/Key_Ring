@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { query, matchedData, validationResult, check } = require('express-validator');
+const { matchedData } = require('express-validator');
 const { model } = require('mongoose');
 
 const User = require('../models/userModel');
@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = matchedData(req);
-    
+
     const user = await User.findOne({ email });
     if (!user) {
       res.status(400);

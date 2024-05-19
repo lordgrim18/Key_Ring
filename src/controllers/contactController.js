@@ -1,4 +1,5 @@
 const asyncHandler = require('express-async-handler');
+const { matchedData } = require('express-validator');
 const Contact = require('../models/contactModel');
 
 // @desc Get all contacts
@@ -46,12 +47,7 @@ const getContact = asyncHandler(async (req, res) => {
 // @route POST /api/v1/contacts
 // @access private
 const createContact = asyncHandler(async (req, res) => {
-    const { name, email, phone } = req.body;
-    if (!name || !email || !phone) {
-        res.status(400);
-        throw new Error('Please fill all fields!!');
-    }
-
+    const { name, email, phone } = matchedData(req);
     const contact = await Contact.create({
         name,
         email,
@@ -83,7 +79,7 @@ const getContactById = asyncHandler(async (req, res) => {
 // @access private
 
 const updateContact = asyncHandler(async (req, res) => {
-    const { name, email, phone } = req.body;
+    const { name, email, phone } = matchedData(req);
     const contact = await Contact.findById(req.params.id);
     if (!contact) {
         res.status(404);
