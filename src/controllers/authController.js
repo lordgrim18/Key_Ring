@@ -10,29 +10,6 @@ const User = require('../models/userModel');
 // @route POST /api/v1/auth/register
 // @access Public
 const registerUser = asyncHandler(async (req, res) => {
-  const validation_errors = validationResult(req);
-  if (!validation_errors.isEmpty()) {
-       // Extract and consolidate errors
-      const extractedErrors = validation_errors.array().reduce((acc, err) => {
-        const existingError = acc.find(e => e.field === err.path && e.value === err.value);
-        if (existingError) {
-          existingError.message += `, ${err.msg}`;
-        } else {
-          acc.push({
-            field: err.path,
-            value: err.value,
-            message: err.msg
-          });
-        }
-        return acc;
-      }, []);
-
-      res.status(400);
-      const error = new Error();
-      error.errors = extractedErrors;
-      throw error;
-  }
-
     const { name, email, password } = matchedData(req);
     //Hash password
     const hashedPassword = await bcrypt.hash(password, 10);

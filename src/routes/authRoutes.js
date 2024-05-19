@@ -8,8 +8,9 @@ const {
 } = require('../controllers/authController');
 const validateToken = require('../middleware/validateTokenHandler');
 const registerUserValidationSchema = require('../schemas/userSchema');
+const handleValidationErrors = require('../middleware/validateSchema');
 
-router.post('/register', checkSchema(registerUserValidationSchema), registerUser);
+router.post('/register', checkSchema(registerUserValidationSchema), handleValidationErrors, registerUser);
 router.post('/login', loginUser);
 router.get('/current-user', validateToken, getCurrentUserInfo);
 
