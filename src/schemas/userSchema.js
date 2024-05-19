@@ -39,4 +39,23 @@ const registerUserValidationSchema = {
     },
 };
 
-module.exports = registerUserValidationSchema;
+const loginUserValidationSchema = {
+    email: {
+        notEmpty: {
+            errorMessage: 'Email is required'
+        },
+        isEmail: {
+            errorMessage: 'Enter proper email address'
+        },
+    },
+    password: {
+        notEmpty: {
+            errorMessage: 'Password is required'
+        },
+    },
+};
+
+module.exports = {
+    registerUserValidationSchema,
+    loginUserValidationSchema,
+}
