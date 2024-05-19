@@ -1,25 +1,39 @@
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const { query, matchedData, validationResult, check } = require('express-validator');
 const { model } = require('mongoose');
+
+const User = require('../models/userModel');
 
 // @desc Register a user
 // @route POST /api/v1/auth/register
 // @access Public
-
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+  const validation_errors = validationResult(req);
+  if (!validation_errors.isEmpty()) {
+       // Extract and consolidate errors
+      const extractedErrors = validation_errors.array().reduce((acc, err) => {
+        const existingError = acc.find(e => e.field === err.path && e.value === err.value);
+        if (existingError) {
+          existingError.message += `, ${err.msg}`;
+        } else {
+          acc.push({
+            field: err.path,
+            value: err.value,
+            message: err.msg
+          });
+        }
+        return acc;
+      }, []);
+
       res.status(400);
-      throw new Error("All fields are mandatory!");
-    }
-    const userAvailable = await User.findOne({ email });
-    if (userAvailable) {
-      res.status(400);
-      throw new Error("User already registered!");
-    }
-  
+      const error = new Error();
+      error.errors = extractedErrors;
+      throw error;
+  }
+
+    const { name, email, password } = matchedData(req);
     //Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
@@ -35,8 +49,8 @@ const registerUser = asyncHandler(async (req, res) => {
         data: { _id: user.id, email: user.email }
     });
     } else {
-      res.status(400);
-      throw new Error("User data is not valid");
+      res.status(500);
+      throw new Error("Something went wrong!");
     }
 });
 
