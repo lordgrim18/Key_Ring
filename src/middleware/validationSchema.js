@@ -1,3 +1,5 @@
+const { checkIfEmailExists } = require('../utils/validatorUtils');
+
 
 const registerUserValidationSchema = {
     email: {
@@ -6,7 +8,16 @@ const registerUserValidationSchema = {
         },
         isEmail: {
             errorMessage: 'Enter proper email address'
-        }
+        },
+        custom: {
+            options: (value) => {
+                return checkIfEmailExists(value).then(user => {
+                    if (user) {
+                        return Promise.reject('Email already in use');
+                    }
+                });
+            }
+        },
     },
     name: {
         notEmpty: {
