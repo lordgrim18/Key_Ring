@@ -22,9 +22,8 @@ describe('Error Handler Middleware', () => {
 
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
-            title: 'Error',
-            message: 'Validation error',
-            errors: [{ msg: 'Invalid Field' }],
+            title: 'Validation Error',
+            error: [{ msg: 'Invalid Field' }],
         });
     });
 
@@ -37,7 +36,7 @@ describe('Error Handler Middleware', () => {
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
             title: 'Not Found',
-            message: 'Resource not found',
+            error: 'Resource not found',
         });
     });
 
@@ -50,7 +49,7 @@ describe('Error Handler Middleware', () => {
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
             title: 'Server Error',
-            message: 'Internal server error',
+            error: 'Internal server error',
         });
     });
 
@@ -63,7 +62,7 @@ describe('Error Handler Middleware', () => {
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
             title: 'Unauthorized',
-            message: 'Unauthorized access',
+            error: 'Unauthorized access',
         });
     });
 
@@ -76,7 +75,7 @@ describe('Error Handler Middleware', () => {
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
             title: 'Forbidden',
-            message: 'Forbidden access',
+            error: 'Forbidden access',
         });
     });
 
@@ -89,7 +88,7 @@ describe('Error Handler Middleware', () => {
         expect(mockResponse.status).toHaveBeenCalledWith(constants.SERVER_ERROR);
         expect(mockResponse.json).toHaveBeenCalledWith({
             title: 'Server Error',
-            message: 'Unknown error',
+            error: 'Unknown error',
         });
     });
 });
