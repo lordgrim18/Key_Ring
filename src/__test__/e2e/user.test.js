@@ -177,6 +177,7 @@ describe('User API Tests', () => {
             // Step 3: Verify the response
             expect(currentUserResponse.status).toBe(200);
             expect(currentUserResponse.body).toHaveProperty('success', true);
+            expect(currentUserResponse.body).toHaveProperty('msg', 'User info retrieved successfully');
             expect(currentUserResponse.body).toHaveProperty('data');
             expect(currentUserResponse.body.data).toHaveProperty('email', data.email);
             // Add more assertions as needed to verify the returned user info
