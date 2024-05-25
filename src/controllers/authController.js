@@ -80,6 +80,7 @@ const loginUser = asyncHandler(async (req, res) => {
 const getCurrentUserInfo = asyncHandler(async (req, res) => {
     res.status(200).json({
       success: true,
+      msg: "User info retrieved successfully",
       data: req.user,
     });
 });
