@@ -5,14 +5,20 @@ require('dotenv').config();
 
 const app = require('../../app');
 
-describe("create user and login", () => {
-	beforeAll(() => {
-		mongoose
-			.connect(process.env.MONGO_URI)
-			.then(() => console.log("Connected to Test Database"))
-			.catch((err) => console.log(`Error: ${err}`));
+beforeAll(() => {
+    mongoose
+        .connect(process.env.MONGO_URI)
+        .then(() => console.log("Connected to Test Database"))
+        .catch((err) => console.log(`Error: ${err}`));
 
-	});
+});
+
+afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+});
+
+describe("create user and login", () => {
 
     data = {
         name: "John Doe",
@@ -103,6 +109,7 @@ describe("create user and login", () => {
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty("success", true);
             expect(response.body.data).toHaveProperty("token");
+            expect(response.body.data).toHaveProperty("email", data.email);
     });
 
     it("should fail if user does not exist", async () => {
@@ -150,11 +157,6 @@ describe("create user and login", () => {
             const error1 = response.body.error[1];
             expect(error1).toHaveProperty("field", "password");
             expect(error1).toHaveProperty("message", "Password is required");
-    });
-
-    afterAll(async () => {
-        await mongoose.connection.dropDatabase();
-        await mongoose.connection.close();
     });
 
 });
