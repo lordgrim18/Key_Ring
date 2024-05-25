@@ -18,9 +18,9 @@ afterAll(async () => {
     await mongoose.connection.close();
 });
 
-describe("create user and login", () => {
+describe("create user and login and check current user", () => {
 
-    data = {
+    const data = {
         name: "John Doe",
         email: "johndoe@email.com",
         password: "password123",
@@ -157,6 +157,56 @@ describe("create user and login", () => {
             const error1 = response.body.error[1];
             expect(error1).toHaveProperty("field", "password");
             expect(error1).toHaveProperty("message", "Password is required");
+    });
+
+    it('should return current user info if token is valid', async () => {
+
+        const loginResponse = await request(app)
+            .post('/api/v1/auth/login')
+            .send({
+                email: data.email, // use valid credentials
+                password: data.password,       // use valid password
+            });
+
+        // Ensure login was successful and we received a token
+        console.log(loginResponse.body);
+        expect(loginResponse.status).toBe(200);
+        expect(loginResponse.body.data).toHaveProperty('token');
+        const token = loginResponse.body.data.token;
+
+        // Step 2: Use the token to access the /current-user endpoint
+        const currentUserResponse = await request(app)
+            .get('/api/v1/auth/current-user')
+            .set('Authorization', `Bearer ${token}`);
+
+        // Step 3: Verify the response
+        expect(currentUserResponse.status).toBe(200);
+        expect(currentUserResponse.body).toHaveProperty('success', true);
+        expect(currentUserResponse.body).toHaveProperty('data');
+        expect(currentUserResponse.body.data).toHaveProperty('email', data.email);
+        // Add more assertions as needed to verify the returned user info
+    });
+
+    it('should fail if token is invalid', async () => {
+        const invalidTokenResponse = await request(app)
+            .get('/api/v1/auth/current-user')
+            .set('Authorization', 'Bearer invalidtoken');
+
+        expect(invalidTokenResponse.status).toBe(401);
+        expect(invalidTokenResponse.body).toHaveProperty('success', false);
+        expect(invalidTokenResponse.body).toHaveProperty('title', 'Unauthorized');
+        expect(invalidTokenResponse.body).toHaveProperty('error', 'Not authorized, token failed');
+    });
+
+    it('should fail if token is missing', async () => {
+
+        const missingTokenResponse = await request(app)
+            .get('/api/v1/auth/current-user');
+
+        expect(missingTokenResponse.status).toBe(401);
+        expect(missingTokenResponse.body).toHaveProperty('success', false);
+        expect(missingTokenResponse.body).toHaveProperty('title', 'Unauthorized');
+        expect(missingTokenResponse.body).toHaveProperty('error', 'Not authorized, no token');
     });
 
 });
