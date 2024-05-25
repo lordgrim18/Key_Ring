@@ -22,8 +22,9 @@ describe('Error Handler Middleware', () => {
 
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
-            title: 'Validation Error',
-            error: [{ msg: 'Invalid Field' }],
+                success: false,
+                title: 'Validation Error',
+                error: [{ msg: 'Invalid Field' }],
         });
     });
 
@@ -35,8 +36,9 @@ describe('Error Handler Middleware', () => {
 
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
-            title: 'Not Found',
-            error: 'Resource not found',
+                success: false,
+                title: 'Not Found',
+                error: 'Resource not found',
         });
     });
 
@@ -48,8 +50,9 @@ describe('Error Handler Middleware', () => {
 
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
-            title: 'Server Error',
-            error: 'Internal server error',
+                success: false,
+                title: 'Server Error',
+                error: 'Internal server error',
         });
     });
 
@@ -61,8 +64,9 @@ describe('Error Handler Middleware', () => {
 
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
-            title: 'Unauthorized',
-            error: 'Unauthorized access',
+                success: false,
+                title: 'Unauthorized',
+                error: 'Unauthorized access',
         });
     });
 
@@ -74,8 +78,9 @@ describe('Error Handler Middleware', () => {
 
         expect(mockResponse.status).not.toHaveBeenCalled();
         expect(mockResponse.json).toHaveBeenCalledWith({
-            title: 'Forbidden',
-            error: 'Forbidden access',
+                success: false,
+                title: 'Forbidden',
+                error: 'Forbidden access',
         });
     });
 
@@ -87,8 +92,9 @@ describe('Error Handler Middleware', () => {
 
         expect(mockResponse.status).toHaveBeenCalledWith(constants.SERVER_ERROR);
         expect(mockResponse.json).toHaveBeenCalledWith({
-            title: 'Server Error',
-            error: 'Unknown error',
+                success: false,
+                title: 'Server Error',
+                error: 'Unknown error',
         });
     });
 });
