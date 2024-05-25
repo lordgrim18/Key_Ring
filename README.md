@@ -8,9 +8,7 @@ A contact maanger web app made using js
 - [Technologies](#technologies)
 - [Installation](#installation)
 - [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
-- [License](#license)
+- [Testing](#testing)
 
 ## Introduction
 
@@ -25,6 +23,7 @@ This project is a backend API built with Node.js and Express. It provides a set 
 - Error handling
 - Logging
 - Environment-based configuration
+- Testing with Jest and Supertest
 
 ## Technologies
 
@@ -34,6 +33,8 @@ This project is a backend API built with Node.js and Express. It provides a set 
 - JWT for authentication
 - dotenv for environment configuration
 - Express-validator for input validation
+- Jest for testing
+- Supertest for testing API endpoints
 
 
 ## Installation
@@ -82,3 +83,14 @@ npm run dev
 
 The server will start at `http://localhost:3000`.
 
+## Testing
+
+The project has been tested across various levels, including unit tests and integration tests and finally end-to-end tests. The tests are written using the Jest testing framework. Supertest has also been used to test the API endpoints. 
+
+The tests are located in the `./src/__tests__` directory.
+
+To run the tests, use:
+
+```sh
+npm run test
+```
