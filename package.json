@@ -4,8 +4,8 @@
   "description": "Express project for my contact manager web app",
   "main": "server.js",
   "scripts": {
+    "test:e2e": "cross-env TEST_TYPE=e2e jest",
     "test": "jest",
-    "test-e2e": "jest --testPathPattern=e2e/",
     "start": "node ./src/server.js",
     "dev": "nodemon ./src/server.js"
   },
@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
+    "cross-env": "^7.0.3",
     "nodemon": "^3.1.0",
     "supertest": "^7.0.0"
   }
