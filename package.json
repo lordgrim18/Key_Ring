@@ -4,6 +4,8 @@
   "description": "Express project for my contact manager web app",
   "main": "server.js",
   "scripts": {
+    "test:unit": "cross-env TEST_TYPE=unit jest",
+    "test:integration": "cross-env TEST_TYPE=integration jest",
     "test:e2e": "cross-env TEST_TYPE=e2e jest",
     "test": "jest",
     "start": "node ./src/server.js",
