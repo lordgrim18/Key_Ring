@@ -58,7 +58,7 @@ const ContactSchema = {
             errorMessage: 'Email is required'
         },
         isEmail: {
-            errorMessage: 'Invalid email',
+            errorMessage: 'Enter proper email address',
         },
     },
     phone: {
@@ -67,7 +67,7 @@ const ContactSchema = {
         },
         isMobilePhone: {
             options: ['en-IN'],
-            errorMessage: 'Invalid phone number',
+            errorMessage: 'Enter proper phone number',
         },
     },
 };
