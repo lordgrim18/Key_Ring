@@ -12,6 +12,17 @@ const data = {
 
 describe("User Register Tests", () => {
 
+    it("should create a new user", async () => {
+        const response = await request(app)
+            .post("/api/v1/auth/register")
+            .send(data);
+        expect(response.status).toBe(201);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "User created successfully");
+        expect(response.body.data).toHaveProperty("_id");
+        expect(response.body.data).toHaveProperty("email", data.email);
+    });
+
     it("should fail if required fields are missing", async () => {
         const response = await request(app)
             .post("/api/v1/auth/register")
@@ -58,17 +69,6 @@ describe("User Register Tests", () => {
         const error2 = response.body.error[2];
         expect(error2).toHaveProperty("field", "password");
         expect(error2).toHaveProperty("message", "Password should be at least 6 chars long");
-    });
-
-    it("should create a new user", async () => {
-        const response = await request(app)
-            .post("/api/v1/auth/register")
-            .send(data);
-        expect(response.status).toBe(201);
-        expect(response.body).toHaveProperty("success", true);
-        expect(response.body).toHaveProperty("msg", "User created successfully");
-        expect(response.body.data).toHaveProperty("_id");
-        expect(response.body.data).toHaveProperty("email", data.email);
     });
 
     it("should fail if user already exists", async () => {
