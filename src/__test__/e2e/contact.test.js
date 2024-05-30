@@ -16,6 +16,16 @@ const contactData = {
     phone: "8657894561",
 };
 
+const tempUser = {
+    name: 'Mark Doe',
+    email: "markdoe@email.com",
+    password: "password123",
+};
+
+let token;
+let contact;
+let tempToken;
+
 describe("Create Contact Tests", () => {
 
     it("should create a new contact", async () => {
@@ -31,11 +41,11 @@ describe("Create Contact Tests", () => {
                 password: userData.password
             });
 
-        global.token = login.body.data.token;
+        token = login.body.data.token;
 
         const response = await request(app)
             .post("/api/v1/contacts/")
-            .set('Authorization', `Bearer ${global.token}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(contactData);
 
             // console.log(response.body);
@@ -52,7 +62,7 @@ describe("Create Contact Tests", () => {
     it("should fail if required fields are missing", async () => {
         const response = await request(app)
             .post("/api/v1/contacts/")
-            .set('Authorization', `Bearer ${global.token}`)
+            .set('Authorization', `Bearer ${token}`)
             .send({});
         expect(response.status).toBe(400);
         expect(response.body).toHaveProperty("success", false);
@@ -75,7 +85,7 @@ describe("Create Contact Tests", () => {
     it("should fail if entered fields are invalid", async () => {
         const response = await request(app)
             .post("/api/v1/contacts/")
-            .set('Authorization', `Bearer ${global.token}`)
+            .set('Authorization', `Bearer ${token}`)
             .send({
                 name: "Jo",
                 email: "johndoe",
@@ -95,4 +105,62 @@ describe("Create Contact Tests", () => {
         expect(error2).toHaveProperty("message", "Enter proper phone number");
     });
 
+});
+
+describe("Get Contact by Id Tests", () => {
+    
+    it("should get a contact by id", async () => {
+
+        contact = await request(app)
+            .post("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${token}`)
+            .send(contactData);
+
+        const response = await request(app)
+            .get(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Show contact");
+
+        expect(response.body.data).toHaveProperty("name", contactData.name);
+        expect(response.body.data).toHaveProperty("email", contactData.email);
+        expect(response.body.data).toHaveProperty("phone", contactData.phone);
+    });
+
+    it("should fail if contact id is invalid", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts/6651f195c1664ed7dabfbac3")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Not Found");
+        expect(response.body).toHaveProperty("error", "Invalid contact id");
+
+    });
+
+    it("should fail if user other than created_by user access it", async () => {
+
+        const register = await request(app)
+            .post("/api/v1/auth/register")
+            .send(tempUser);
+
+        const login = await request(app)
+            .post("/api/v1/auth/login")
+            .send(tempUser);
+
+        tempToken = login.body.data.token;
+
+
+        const response = await request(app)
+            .get(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${tempToken}`);
+        expect(response.status).toBe(401);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Unauthorized");
+        expect(response.body).toHaveProperty("error", "User dont have access to other users contacts");
+    });
+        
 });
