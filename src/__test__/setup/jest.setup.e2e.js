@@ -8,26 +8,6 @@ beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URI)
             .then(() => console.log("Connected to Test Database"))
             .catch((err) => console.log(`Error: ${err}`));
-
-    // Create a user and log in to get a token
-    const userData = {
-        name: 'John Doe',
-        email: "johndoe@email.com",
-        password: "password123",
-    };
-
-    await request(app)
-        .post('/api/v1/auth/register')
-        .send(userData);
-
-    const loginResponse = await request(app)
-        .post('/api/v1/auth/login')
-        .send({
-            email: userData.email,
-            password: userData.password,
-        });
-
-    global.token = loginResponse.body.data.token;
 });
 
 afterAll(async () => {
