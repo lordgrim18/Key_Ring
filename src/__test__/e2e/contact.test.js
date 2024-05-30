@@ -4,6 +4,12 @@ require('dotenv').config();
 
 const app = require('../../app');
 
+const userData = {
+    name: 'John Doe',
+    email: "johndoe@email.com",
+    password: "password123",
+};
+
 const contactData = {
     name: 'Jane Doe',
     email: "janedoe@email.com",
@@ -13,6 +19,20 @@ const contactData = {
 describe("Create Contact Tests", () => {
 
     it("should create a new contact", async () => {
+
+        register = await request(app)
+            .post("/api/v1/auth/register")
+            .send(userData);
+
+        login = await request(app)
+            .post("/api/v1/auth/login")
+            .send({
+                email: userData.email,
+                password: userData.password
+            });
+
+        global.token = login.body.data.token;
+
         const response = await request(app)
             .post("/api/v1/contacts/")
             .set('Authorization', `Bearer ${global.token}`)

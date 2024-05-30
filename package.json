@@ -6,7 +6,7 @@
   "scripts": {
     "test:unit": "cross-env TEST_TYPE=unit jest",
     "test:integration": "cross-env TEST_TYPE=integration jest",
-    "test:e2e": "cross-env TEST_TYPE=e2e jest",
+    "test:e2e": "cross-env TEST_TYPE=e2e jest --runInBand",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "start": "node ./src/server.js",
     "dev": "nodemon ./src/server.js"
