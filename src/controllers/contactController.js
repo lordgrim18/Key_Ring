@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { matchedData } = require('express-validator');
+const mongoose = require('mongoose');
+
 const Contact = require('../models/contactModel');
 
 // @desc Get all contacts
@@ -62,11 +64,19 @@ const createContact = asyncHandler(async (req, res) => {
 // @route GET /api/v1/contacts/:id
 // @access private
 const getContactById = asyncHandler(async (req, res) => {
-    const contact = await Contact.findById(req.params.id);
+    contactId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(contactId)) {
+        res.status(404);
+        throw new Error('Invalid contact id');
+    }
+
+    const contact = await Contact.findById(contactId);
+
     if (!contact) {
         res.status(404);
-        throw new Error('Contact not found');
+        throw new Error('Invalid contact id');
     }
+
     if (contact.created_by.toString() !== req.user.id) {
         res.status(401);
         throw new Error('User dont have access to other users contacts');
