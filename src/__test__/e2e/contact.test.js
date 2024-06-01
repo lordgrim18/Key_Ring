@@ -16,6 +16,18 @@ const contactData = {
     phone: "8657894561",
 };
 
+const contactData2 = {
+    name: 'Jake Thayne',
+    email: "jakethayne@email.com",
+    phone: "8657894562",
+};
+
+const contactData3 = {
+    name: 'Celeb Thayne',
+    email: "celebthayne@email.com",
+    phone: "8657894563",
+};
+
 const tempUser = {
     name: 'Mark Doe',
     email: "markdoe@email.com",
@@ -48,7 +60,7 @@ describe("Create Contact Tests", () => {
             .set('Authorization', `Bearer ${token}`)
             .send(contactData);
 
-            // console.log(response.body);
+        contact = response;
 
         expect(response.status).toBe(201);
         expect(response.body).toHaveProperty("success", true);
@@ -111,11 +123,6 @@ describe("Get Contact by Id Tests", () => {
     
     it("should get a contact by id", async () => {
 
-        contact = await request(app)
-            .post("/api/v1/contacts/")
-            .set('Authorization', `Bearer ${token}`)
-            .send(contactData);
-
         const response = await request(app)
             .get(`/api/v1/contacts/${contact.body.data._id}`)
             .set('Authorization', `Bearer ${token}`);
@@ -164,3 +171,109 @@ describe("Get Contact by Id Tests", () => {
     });
         
 });
+
+describe("Get All Contacts Tests", () => {
+        
+    it("should get all contacts", async () => {
+
+        const createContact = await request(app)
+            .post("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${token}`)
+            .send(contactData2);
+
+        const response = await request(app)
+            .get("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveLength(2);
+        expect(response.body.data[0]).toHaveProperty("name", contactData2.name);
+        expect(response.body.data[0]).toHaveProperty("email", contactData2.email);
+        expect(response.body.data[0]).toHaveProperty("phone", contactData2.phone);
+
+        expect(response.body.data[1]).toHaveProperty("name", contactData.name);
+        expect(response.body.data[1]).toHaveProperty("email", contactData.email);
+        expect(response.body.data[1]).toHaveProperty("phone", contactData.phone);
+
+        expect(response.body).toHaveProperty("pagination");
+        expect(response.body.pagination).toHaveProperty("page", 1);
+        expect(response.body.pagination).toHaveProperty("limit", 10);
+        expect(response.body.pagination).toHaveProperty("totalPages", 1);
+    });
+
+    it("should return empty array if no contacts found", async () => {
+            
+        const response = await request(app)
+            .get("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${tempToken}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveLength(0);
+
+        expect(response.body).toHaveProperty("pagination");
+        expect(response.body.pagination).toHaveProperty("page", 1);
+        expect(response.body.pagination).toHaveProperty("limit", 10);
+        expect(response.body.pagination).toHaveProperty("totalPages", 0);
+    });
+
+    it("should return separate contacts for different users", async () => {
+            
+        const response1 = await request(app)
+            .get("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${token}`);
+
+        const createContact = await request(app)
+            .post("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${tempToken}`)
+            .send(contactData3);
+
+        const response2 = await request(app)
+            .get("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${tempToken}`);
+
+        expect(response1.status).toBe(200);
+        expect(response1.body).toHaveProperty("success", true);
+        expect(response1.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response1.body).toHaveProperty("data");
+        expect(response1.body.data).toHaveLength(2);
+        expect(response1.body.data[0]).toHaveProperty("name", contactData2.name);
+        expect(response1.body.data[0]).toHaveProperty("email", contactData2.email);
+        expect(response1.body.data[0]).toHaveProperty("phone", contactData2.phone);
+
+        expect(response1.body.data[1]).toHaveProperty("name", contactData.name);
+        expect(response1.body.data[1]).toHaveProperty("email", contactData.email);
+        expect(response1.body.data[1]).toHaveProperty("phone", contactData.phone);
+
+        expect(response1.body).toHaveProperty("pagination");
+        expect(response1.body.pagination).toHaveProperty("page", 1);
+        expect(response1.body.pagination).toHaveProperty("limit", 10);
+        expect(response1.body.pagination).toHaveProperty("totalPages", 1);
+
+        expect(response2.status).toBe(200);
+        expect(response2.body).toHaveProperty("success", true);
+        expect(response2.body).toHaveProperty("msg", "Show all contacts");
+        
+        expect(response2.body).toHaveProperty("data");
+        expect(response2.body.data).toHaveLength(1);
+        expect(response2.body.data[0]).toHaveProperty("name", contactData3.name);
+        expect(response2.body.data[0]).toHaveProperty("email", contactData3.email);
+        expect(response2.body.data[0]).toHaveProperty("phone", contactData3.phone);
+
+        expect(response2.body).toHaveProperty("pagination");
+        expect(response2.body.pagination).toHaveProperty("page", 1);
+        expect(response2.body.pagination).toHaveProperty("limit", 10);
+        expect(response2.body.pagination).toHaveProperty("totalPages", 1);
+
+    });
+
+});
+
