@@ -339,3 +339,44 @@ describe("Update Contact Tests and check if the value has actually changed", () 
     });
 
 });
+
+describe("Delete Contact Tests", () => {
+
+    it("should fail if contact id is invalid", async () => {
+        const response = await request(app)
+            .delete("/api/v1/contacts/6651f195c1664ed7dabfbac3")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Not Found");
+        expect(response.body).toHaveProperty("error", "Contact not found");
+
+    });
+
+    it("should fail if user other than created_by user access it", async () => {
+
+        const response = await request(app)
+            .delete(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${tempToken}`);
+        expect(response.status).toBe(401);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Unauthorized");
+        expect(response.body).toHaveProperty("error", "User dont have access to other users contacts");
+    });
+            
+    it("should delete a contact", async () => {
+
+        const response = await request(app)
+            .delete(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Contact removed");
+
+        const deletedContact = await Contact.findById(contact.body.data._id);
+        expect(deletedContact).toBeNull();
+    });
+
+});
