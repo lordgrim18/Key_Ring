@@ -1,5 +1,8 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
+
+const Contact = require('../../models/contactModel');
+
 require('dotenv').config();
 
 const app = require('../../app');
@@ -7,6 +10,12 @@ const app = require('../../app');
 const userData = {
     name: 'John Doe',
     email: "johndoe@email.com",
+    password: "password123",
+};
+
+const tempUser = {
+    name: 'Mark Doe',
+    email: "markdoe@email.com",
     password: "password123",
 };
 
@@ -28,10 +37,10 @@ const contactData3 = {
     phone: "8657894563",
 };
 
-const tempUser = {
-    name: 'Mark Doe',
-    email: "markdoe@email.com",
-    password: "password123",
+const updateData = {
+    name: 'Vicky Doe',
+    email: "vickydoe@email.com",
+    phone: "8657894564",
 };
 
 let token;
@@ -277,3 +286,97 @@ describe("Get All Contacts Tests", () => {
 
 });
 
+describe("Update Contact Tests and check if the value has actually changed", () => {
+        
+    it("should update a contact", async () => {
+
+        originalContact = await Contact.findById(contact.body.data._id)
+
+        const response = await request(app)
+            .put(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(updateData);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Updated contact");
+
+        expect(response.body.data).toHaveProperty("name", updateData.name);
+        expect(response.body.data).toHaveProperty("email", updateData.email);
+        expect(response.body.data).toHaveProperty("phone", updateData.phone);
+
+        updatedContact = await Contact.findById(contact.body.data._id)
+
+        expect(originalContact.name).not.toBe(updatedContact.name);
+        expect(originalContact.email).not.toBe(updatedContact.email);
+        expect(originalContact.phone).not.toBe(updatedContact.phone);
+
+    });
+
+    it("should fail if contact id is invalid", async () => {
+        const response = await request(app)
+            .put("/api/v1/contacts/6651f195c1664ed7dabfbac3")
+            .set('Authorization', `Bearer ${token}`)
+            .send(updateData);
+
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Not Found");
+        expect(response.body).toHaveProperty("error", "Contact not found");
+
+    });
+
+    it("should fail if user other than created_by user access it", async () => {
+
+        const response = await request(app)
+            .put(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${tempToken}`)
+            .send(updateData);
+        expect(response.status).toBe(401);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Unauthorized");
+        expect(response.body).toHaveProperty("error", "User dont have access to other users contacts");
+    });
+
+});
+
+describe("Delete Contact Tests", () => {
+
+    it("should fail if contact id is invalid", async () => {
+        const response = await request(app)
+            .delete("/api/v1/contacts/6651f195c1664ed7dabfbac3")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Not Found");
+        expect(response.body).toHaveProperty("error", "Contact not found");
+
+    });
+
+    it("should fail if user other than created_by user access it", async () => {
+
+        const response = await request(app)
+            .delete(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${tempToken}`);
+        expect(response.status).toBe(401);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Unauthorized");
+        expect(response.body).toHaveProperty("error", "User dont have access to other users contacts");
+    });
+            
+    it("should delete a contact", async () => {
+
+        const response = await request(app)
+            .delete(`/api/v1/contacts/${contact.body.data._id}`)
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Contact removed");
+
+        const deletedContact = await Contact.findById(contact.body.data._id);
+        expect(deletedContact).toBeNull();
+    });
+
+});
