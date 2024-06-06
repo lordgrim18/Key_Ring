@@ -1,4 +1,5 @@
 const { get } = require("mongoose");
+const { options } = require("../app");
 
 const getContactsSchema = {
     search: {
@@ -29,14 +30,16 @@ const getContactsSchema = {
     },
     page: {
         isInt: {
-            errorMessage: 'Page must be an integer',
+            errorMessage: 'Page must be a positive integer',
+            options: { min: 1 },
         },
         toInt: true,
         optional: true,
     },
     limit: {
         isInt: {
-            errorMessage: 'Limit must be an integer',
+            errorMessage: 'Limit must be a positive integer',
+            options: { min: 1 },
         },
         toInt: true,
         optional: true,

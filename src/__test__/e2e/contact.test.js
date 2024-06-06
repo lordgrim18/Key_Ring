@@ -380,3 +380,159 @@ describe("Delete Contact Tests", () => {
     });
 
 });
+
+describe("Pagination Tests", () => {
+    
+    it("should return paginated contacts with default limit", async () => {
+
+        // Empty the Contact collection
+        await Contact.deleteMany({});
+
+        // Create 15 contacts
+        for (let i = 0; i < 15; i++) {
+            const contact = {
+                name: `Contact${i}`,
+                email: `Email${i}@email.com`,
+                phone: i < 10 ? `865789456${i}` : `86578945${i}`,
+            };
+            await request(app)
+                .post("/api/v1/contacts/")
+                .set('Authorization', `Bearer ${token}`)
+                .send(contact);
+        }
+
+        // Request the first page of contacts
+        const responsePage1 = await request(app)
+            .get("/api/v1/contacts?page=1")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(responsePage1.status).toBe(200);
+        expect(responsePage1.body).toHaveProperty("success", true);
+        expect(responsePage1.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(responsePage1.body).toHaveProperty("data");
+        expect(responsePage1.body.data).toHaveLength(10);
+        expect(responsePage1.body).toHaveProperty("pagination");
+        expect(responsePage1.body.pagination).toHaveProperty("page", 1);
+        expect(responsePage1.body.pagination).toHaveProperty("limit", 10);
+        expect(responsePage1.body.pagination).toHaveProperty("totalPages", 2);
+
+        // Request the second page of contacts
+        const responsePage2 = await request(app)
+            .get("/api/v1/contacts?page=2")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(responsePage2.status).toBe(200);
+        expect(responsePage2.body).toHaveProperty("success", true);
+        expect(responsePage2.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(responsePage2.body).toHaveProperty("data");
+        expect(responsePage2.body.data).toHaveLength(5); // Only 5 contacts should be on the second page
+        expect(responsePage2.body).toHaveProperty("pagination");
+        expect(responsePage2.body.pagination).toHaveProperty("page", 2);
+        expect(responsePage2.body.pagination).toHaveProperty("limit", 10);
+        expect(responsePage2.body.pagination).toHaveProperty("totalPages", 2);
+    });
+
+    it("should return paginated contacts with specified limit", async () => {
+        // Request the first page of contacts with limit 5
+        const responsePage1 = await request(app)
+            .get("/api/v1/contacts?page=1&limit=5")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(responsePage1.status).toBe(200);
+        expect(responsePage1.body).toHaveProperty("success", true);
+        expect(responsePage1.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(responsePage1.body).toHaveProperty("data");
+        expect(responsePage1.body.data).toHaveLength(5); // Only 5 contacts should be on the first page
+        expect(responsePage1.body).toHaveProperty("pagination");
+        expect(responsePage1.body.pagination).toHaveProperty("page", 1);
+        expect(responsePage1.body.pagination).toHaveProperty("limit", 5);
+        expect(responsePage1.body.pagination).toHaveProperty("totalPages", 3);
+
+        // Request the second page of contacts with limit 5
+        const responsePage2 = await request(app)
+            .get("/api/v1/contacts?page=2&limit=5")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(responsePage2.status).toBe(200);
+        expect(responsePage2.body).toHaveProperty("success", true);
+        expect(responsePage2.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(responsePage2.body).toHaveProperty("data");
+        expect(responsePage2.body.data).toHaveLength(5); // Only 5 contacts should be on the second page
+        expect(responsePage2.body).toHaveProperty("pagination");
+        expect(responsePage2.body.pagination).toHaveProperty("page", 2);
+        expect(responsePage2.body.pagination).toHaveProperty("limit", 5);
+        expect(responsePage2.body.pagination).toHaveProperty("totalPages", 3);
+
+        // Request the third page of contacts with limit 5
+        const responsePage3 = await request(app)
+            .get("/api/v1/contacts?page=3&limit=5")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(responsePage3.status).toBe(200);
+        expect(responsePage3.body).toHaveProperty("success", true);
+        expect(responsePage3.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(responsePage3.body).toHaveProperty("data");
+        expect(responsePage3.body.data).toHaveLength(5); // Only 5 contacts should be on the third page
+        expect(responsePage3.body).toHaveProperty("pagination");
+        expect(responsePage3.body.pagination).toHaveProperty("page", 3);
+        expect(responsePage3.body.pagination).toHaveProperty("limit", 5);
+        expect(responsePage3.body.pagination).toHaveProperty("totalPages", 3);
+    });
+
+    it("should return empty array when page number is invalid", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?page=4")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response.body).toHaveProperty("data");
+        expect(response.body.data).toHaveLength(0);
+        expect(response.body).toHaveProperty("pagination");
+        expect(response.body.pagination).toHaveProperty("page", 4);
+        expect(response.body.pagination).toHaveProperty("limit", 10);
+        expect(response.body.pagination).toHaveProperty("totalPages", 2);
+    });
+
+    it("should return error when limit or page is non integer", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?page=a&limit=b")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Validation Error");
+
+        expect(response.body.error).toHaveLength(2);
+        expect(response.body.error[0]).toHaveProperty("field", "page");
+        expect(response.body.error[0]).toHaveProperty("message", "Page must be a positive integer");
+
+        expect(response.body.error[1]).toHaveProperty("field", "limit");
+        expect(response.body.error[1]).toHaveProperty("message", "Limit must be a positive integer");
+    });
+
+    it("should return error when limit or page is less than 1", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?page=0&limit=0")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Validation Error");
+
+        expect(response.body.error).toHaveLength(2);
+        expect(response.body.error[0]).toHaveProperty("field", "page");
+        expect(response.body.error[0]).toHaveProperty("message", "Page must be a positive integer");
+
+        expect(response.body.error[1]).toHaveProperty("field", "limit");
+        expect(response.body.error[1]).toHaveProperty("message", "Limit must be a positive integer");
+    });
+
+});
