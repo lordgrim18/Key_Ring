@@ -501,4 +501,38 @@ describe("Pagination Tests", () => {
         expect(response.body.pagination).toHaveProperty("totalPages", 2);
     });
 
+    it("should return error when limit or page is non integer", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?page=a&limit=b")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Validation Error");
+
+        expect(response.body.error).toHaveLength(2);
+        expect(response.body.error[0]).toHaveProperty("field", "page");
+        expect(response.body.error[0]).toHaveProperty("message", "Page must be a positive integer");
+
+        expect(response.body.error[1]).toHaveProperty("field", "limit");
+        expect(response.body.error[1]).toHaveProperty("message", "Limit must be a positive integer");
+    });
+
+    it("should return error when limit or page is less than 1", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?page=0&limit=0")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Validation Error");
+
+        expect(response.body.error).toHaveLength(2);
+        expect(response.body.error[0]).toHaveProperty("field", "page");
+        expect(response.body.error[0]).toHaveProperty("message", "Page must be a positive integer");
+
+        expect(response.body.error[1]).toHaveProperty("field", "limit");
+        expect(response.body.error[1]).toHaveProperty("message", "Limit must be a positive integer");
+    });
+
 });
