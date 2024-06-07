@@ -37,6 +37,18 @@ const contactData3 = {
     phone: "8657894563",
 };
 
+const contactData4 = {
+    name: 'Annie Thayne',
+    email: "anniethayne@email.com",
+    phone: "8657894564",
+};
+
+const contactData5 = {
+    name: 'Xander Thayne',
+    email: "xanderthayne@email.com",
+    phone: "8657894565",
+};
+
 const updateData = {
     name: 'Vicky Doe',
     email: "vickydoe@email.com",
@@ -533,6 +545,145 @@ describe("Pagination Tests", () => {
 
         expect(response.body.error[1]).toHaveProperty("field", "limit");
         expect(response.body.error[1]).toHaveProperty("message", "Limit must be a positive integer");
+    });
+
+});
+
+describe("Search and Sort Contact Tests", () => {
+
+    it("should return contacts with search query", async () => {
+
+        const addContact = await request(app)
+            .post("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${token}`)
+            .send(contactData4);
+
+        const addContact1 = await request(app)
+            .post("/api/v1/contacts/")
+            .set('Authorization', `Bearer ${token}`)
+            .send(contactData5);
+
+        const response1 = await request(app)
+            .get("/api/v1/contacts?search=an")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response1.status).toBe(200);
+        expect(response1.body).toHaveProperty("success", true);
+        expect(response1.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response1.body.data).toHaveLength(2);
+        expect(response1.body.data[0]).toHaveProperty("name", "Xander Thayne");
+        expect(response1.body.data[1]).toHaveProperty("name", "Annie Thayne");
+
+    });
+
+    it("should return contacts with sort query in descending order", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?sortBy=name&orderBy=desc")
+            .set('Authorization', `Bearer ${token}`);
+
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response.body.data).toHaveLength(10);
+
+        expect(response.body.data[0]).toHaveProperty("name", "Xander Thayne");
+        expect(response.body.data[1]).toHaveProperty("name", "Contact14");
+        expect(response.body.data[9]).toHaveProperty("name", "Contact6");
+        expect(response.body.pagination).toHaveProperty("totalPages", 2);
+
+        const response1 = await request(app)
+            .get("/api/v1/contacts?sortBy=name&orderBy=desc&page=2")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response1.status).toBe(200);
+        expect(response1.body).toHaveProperty("success", true);
+        expect(response1.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response1.body.data).toHaveLength(7);
+
+        expect(response1.body.data[0]).toHaveProperty("name", "Contact5");
+        expect(response1.body.data[6]).toHaveProperty("name", "Annie Thayne");
+        expect(response1.body.pagination).toHaveProperty("totalPages", 2);
+
+    });
+
+    it("should return contacts with sort query in ascending order", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?sortBy=name&orderBy=asc")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response.body.data).toHaveLength(10);
+
+        expect(response.body.data[0]).toHaveProperty("name", "Annie Thayne");
+        expect(response.body.data[1]).toHaveProperty("name", "Contact0");
+        expect(response.body.data[9]).toHaveProperty("name", "Contact8");
+        expect(response.body.pagination).toHaveProperty("totalPages", 2);
+
+        const response1 = await request(app)
+            .get("/api/v1/contacts?sortBy=name&orderBy=asc&page=2")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response1.status).toBe(200);
+        expect(response1.body).toHaveProperty("success", true);
+        expect(response1.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response1.body.data).toHaveLength(7);
+
+        expect(response1.body.data[0]).toHaveProperty("name", "Contact9");
+        expect(response1.body.data[6]).toHaveProperty("name", "Xander Thayne");
+        expect(response1.body.pagination).toHaveProperty("totalPages", 2);
+
+    });
+
+    it("should return contacts with sort done on search result", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?sortBy=name&orderBy=asc&search=1")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+
+        expect(response.body.data).toHaveLength(6);
+
+        expect(response.body.data[0]).toHaveProperty("name", "Contact1");
+        expect(response.body.data[1]).toHaveProperty("name", "Contact10");
+        expect(response.body.data[5]).toHaveProperty("name", "Contact14");
+        expect(response.body.pagination).toHaveProperty("totalPages", 1);
+    });
+
+    it("should return error if sortBy or orderBy field is invalid", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?sortBy=invalid&orderBy=invalid")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty("success", false);
+        expect(response.body).toHaveProperty("title", "Validation Error");
+
+        expect(response.body.error).toHaveLength(2);
+        expect(response.body.error[0]).toHaveProperty("field", "sortBy");
+        expect(response.body.error[0]).toHaveProperty("message", "Invalid sort by field, must be one of [name, email, createdAt]");
+        expect(response.body.error[1]).toHaveProperty("field", "orderBy");
+        expect(response.body.error[1]).toHaveProperty("message", "Invalid order by field, must be one of [asc, desc]");
+    });
+
+    it("should return empty array if no contacts found with search query", async () => {
+        const response = await request(app)
+            .get("/api/v1/contacts?search=xyz")
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty("success", true);
+        expect(response.body).toHaveProperty("msg", "Show all contacts");
+
+        expect(response.body.data).toHaveLength(0);
     });
 
 });
