@@ -29,7 +29,12 @@ const getContact = asyncHandler(async (req, res) => {
     // Pagination options
     const skip = (page - 1) * limit;
   
-    const contacts = await Contact.find(filter, null, { sort, skip, limit });
+    const contacts = await Contact.find(filter)
+      .collation({ locale: 'en', numericOrdering: true }) // Use collation for numeric ordering
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+      
     const totalContacts = await Contact.countDocuments(filter); // Count total contacts
   
     res.status(200).json({
@@ -40,6 +45,7 @@ const getContact = asyncHandler(async (req, res) => {
         page,
         limit,
         totalPages: Math.ceil(totalContacts / limit),
+        totalContacts,
       },
     });
   });
