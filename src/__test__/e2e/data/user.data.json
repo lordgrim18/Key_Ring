@@ -14,11 +14,6 @@
             "name": "Mark Doe",
             "email": "markdoe@email.com",
             "password": "password123"
-        },
-        {
-            "name": "Vicky Doe",
-            "email": "vickydoe@email.com",
-            "phone": "8657894564"
         }
     ]
 }
