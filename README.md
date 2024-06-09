@@ -89,7 +89,27 @@ The project has been tested across various levels, including unit tests and inte
 
 The tests are located in the `./src/__tests__` directory.
 
-To run the tests, use:
+Each level of testing can be run separately:
+
+- Unit tests:
+
+```sh
+npm run test:unit
+```
+
+- Integration tests:
+
+```sh
+npm run test:integration
+```
+
+- End-to-end tests:
+
+```sh
+npm run test:e2e
+```
+
+To run all the tests, use:
 
 ```sh
 npm run test
