@@ -1,14 +1,13 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
-const app = require('../../app');
+const app = require('../../../app');
 
-const data = {
-    name: 'Jack Berry',
-    email: "jackberry@email.com",
-    password: "password123",
-};
+const { users } = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'user.data.json'), 'utf8'));
+const data = users[0];
 
 describe("User Register Tests", () => {
 

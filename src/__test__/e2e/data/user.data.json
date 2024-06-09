@@ -1,0 +1,19 @@
+{
+    "users":[
+        {
+            "name": "Jack Berry",
+            "email": "jackberry@email.com",
+            "password": "password123"
+        },
+        {
+            "name": "John Doe",
+            "email": "johndoe@email.com",
+            "password": "password123"
+        },
+        {
+            "name": "Mark Doe",
+            "email": "markdoe@email.com",
+            "password": "password123"
+        }
+    ]
+}
