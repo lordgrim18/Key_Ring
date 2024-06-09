@@ -9,13 +9,8 @@ require('dotenv').config();
 
 const app = require('../../../app');
 
-console.log(__dirname);
-const testData = JSON.parse(fs.readFileSync(path.join(__dirname, 'contactTestData.json'), 'utf8'));
-
-console.log(testData);
-
+const testData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'contactTestData.json'), 'utf8'));
 const { userData, tempUser, contacts, updateData } = testData;
-
 
 let token;
 let contact;

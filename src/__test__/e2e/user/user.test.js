@@ -2,7 +2,7 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const app = require('../../app');
+const app = require('../../../app');
 
 const data = {
     name: 'Jack Berry',
