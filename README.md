@@ -1,5 +1,5 @@
 # Key_Ring
-A contact maanger web app made using js
+A contact manager web app made using js
 
 ## Table of Contents
 
