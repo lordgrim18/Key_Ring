@@ -9,8 +9,8 @@ require('dotenv').config();
 
 const app = require('../../../app');
 
-const testData = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'contactTestData.json'), 'utf8'));
-const { userData, tempUser, contacts, updateData } = testData;
+const { users } = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'user.data.json'), 'utf8'));
+const { contacts } = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'contact.data.json'), 'utf8'));
 
 let token;
 let contact;
@@ -22,13 +22,13 @@ describe("Create Contact Tests", () => {
 
         register = await request(app)
             .post("/api/v1/auth/register")
-            .send(userData);
+            .send(users[1]);
 
         login = await request(app)
             .post("/api/v1/auth/login")
             .send({
-                email: userData.email,
-                password: userData.password
+                email: users[1].email,
+                password: users[1].password
             });
 
         token = login.body.data.token;
@@ -130,11 +130,11 @@ describe("Get Contact by Id Tests", () => {
 
         const register = await request(app)
             .post("/api/v1/auth/register")
-            .send(tempUser);
+            .send(users[2]);
 
         const login = await request(app)
             .post("/api/v1/auth/login")
-            .send(tempUser);
+            .send(users[2]);
 
         tempToken = login.body.data.token;
 
@@ -264,15 +264,15 @@ describe("Update Contact Tests and check if the value has actually changed", () 
         const response = await request(app)
             .put(`/api/v1/contacts/${contact.body.data._id}`)
             .set('Authorization', `Bearer ${token}`)
-            .send(updateData);
+            .send(contacts[3]);
 
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty("success", true);
         expect(response.body).toHaveProperty("msg", "Updated contact");
 
-        expect(response.body.data).toHaveProperty("name", updateData.name);
-        expect(response.body.data).toHaveProperty("email", updateData.email);
-        expect(response.body.data).toHaveProperty("phone", updateData.phone);
+        expect(response.body.data).toHaveProperty("name", contacts[3].name);
+        expect(response.body.data).toHaveProperty("email", contacts[3].email);
+        expect(response.body.data).toHaveProperty("phone", contacts[3].phone);
 
         updatedContact = await Contact.findById(contact.body.data._id)
 
@@ -286,7 +286,7 @@ describe("Update Contact Tests and check if the value has actually changed", () 
         const response = await request(app)
             .put("/api/v1/contacts/6651f195c1664ed7dabfbac3")
             .set('Authorization', `Bearer ${token}`)
-            .send(updateData);
+            .send(contacts[3]);
 
         expect(response.status).toBe(404);
         expect(response.body).toHaveProperty("success", false);
@@ -300,7 +300,7 @@ describe("Update Contact Tests and check if the value has actually changed", () 
         const response = await request(app)
             .put(`/api/v1/contacts/${contact.body.data._id}`)
             .set('Authorization', `Bearer ${tempToken}`)
-            .send(updateData);
+            .send(contacts[3]);
         expect(response.status).toBe(401);
         expect(response.body).toHaveProperty("success", false);
         expect(response.body).toHaveProperty("title", "Unauthorized");
@@ -513,12 +513,12 @@ describe("Search and Sort Contact Tests", () => {
         const addContact = await request(app)
             .post("/api/v1/contacts/")
             .set('Authorization', `Bearer ${token}`)
-            .send(contacts[3]);
+            .send(contacts[4]);
 
         const addContact1 = await request(app)
             .post("/api/v1/contacts/")
             .set('Authorization', `Bearer ${token}`)
-            .send(contacts[4]);
+            .send(contacts[5]);
 
         const response1 = await request(app)
             .get("/api/v1/contacts?search=an")
