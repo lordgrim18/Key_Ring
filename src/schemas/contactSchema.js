@@ -1,6 +1,3 @@
-const { get } = require("mongoose");
-const { options } = require("../app");
-
 const getContactsSchema = {
     search: {
         isString: {
