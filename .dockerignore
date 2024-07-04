@@ -1,9 +1,11 @@
 node_modules
 
-data
-
 .env
 .git
 .gitignore
 
 README.md
+
+Dockerfile
+docker-compose*
+.dockerignore 
