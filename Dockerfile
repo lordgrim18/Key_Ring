@@ -1,6 +1,6 @@
 FROM node:20-alpine3.19
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5001
+ENV PORT 5001
 
-CMD ["npm", "run", "start"]
+EXPOSE $PORT
+
+CMD ["npm", "run", "dev"]
