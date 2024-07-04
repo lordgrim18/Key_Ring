@@ -4,10 +4,11 @@ services:
     container_name: key-ring-backend
     ports:
       - "${PORT}:${PORT}"
-    environment:
-      - PORT=${PORT}
-      - CONNECTION_STRING=${CONNECTION_STRING}
-      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+    env_file:
+      - ./.env
+    volumes:
+      - .:/app
+      - /app/node_modules
     depends_on:
       - mongo
 
