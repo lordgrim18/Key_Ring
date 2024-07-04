@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   web:
     build: .
+    container_name: key-ring-backend
     ports:
       - "${PORT}:${PORT}"
     environment:
@@ -11,8 +10,10 @@ services:
       - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
     depends_on:
       - mongo
+
   mongo:
     image: mongo:latest
+    container_name: mongodb
     ports:
       - "27017:27017"
     volumes:
@@ -20,6 +21,6 @@ services:
 
   mongo-express:
     image: mongo-express
-    restart: always
+    container_name: mongo-express
     ports:
       - 8081:8081
