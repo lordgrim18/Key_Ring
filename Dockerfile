@@ -12,4 +12,4 @@ ENV PORT 5001
 
 EXPOSE $PORT
 
-CMD ["npm", "run", "dev"]
+CMD ["node", "./src/server.js"]

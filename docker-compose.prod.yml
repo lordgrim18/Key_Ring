@@ -1,0 +1,4 @@
+services:
+  web:
+    build: .
+    command: node ./src/server.js
