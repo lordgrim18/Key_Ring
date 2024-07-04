@@ -1,4 +1,9 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        - NODE_ENV=production
     command: node ./src/server.js
+    environment:
+      - NODE_ENV=production
