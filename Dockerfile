@@ -1,13 +1,20 @@
 FROM node:20-alpine3.19
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+ARG NODE_ENV=
+
+RUN if [ "$NODE_ENV" = "development" ]; \
+    then npm install; \
+    else npm install --only=production; \
+    fi
 
 COPY . .
 
-EXPOSE 5001
+ENV PORT 5001
 
-CMD ["npm", "run", "start"]
+EXPOSE $PORT
+
+CMD ["node", "./src/server.js"]
