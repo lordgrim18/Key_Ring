@@ -1,4 +1,8 @@
 services:
+  nginx:
+    ports:
+      - 80:80
+
   backend:
     build:
       context: .
