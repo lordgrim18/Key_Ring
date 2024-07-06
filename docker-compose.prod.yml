@@ -1,9 +1,11 @@
 services:
-  web:
+  nginx:
+    ports:
+      - 80:80
+
+  backend:
     build:
       context: .
       args:
         - NODE_ENV=production
     command: node ./src/server.js
-    environment:
-      - NODE_ENV=production
