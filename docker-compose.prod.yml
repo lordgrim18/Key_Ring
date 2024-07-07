@@ -4,6 +4,8 @@ services:
       - 80:80
 
   backend:
+    image: 
+      235108306082.dkr.ecr.ap-south-1.amazonaws.com/key-ring:latest
     deploy:
       replicas: 5
       restart_policy:
