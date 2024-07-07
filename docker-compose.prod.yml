@@ -4,6 +4,13 @@ services:
       - 80:80
 
   backend:
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 2
+        delay: 10s
     build:
       context: .
       args:
