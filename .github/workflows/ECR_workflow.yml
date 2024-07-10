@@ -36,16 +36,31 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
-        # Retrieve the latest image tag
-        latest_image=$(aws ecr describe-images --repository-name $ECR_REPOSITORY --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' --output text --region $AWS_REGION)
-        echo "Latest image tag: $latest_image"
+        # Retrieve all image tags
+        all_tags=$(aws ecr describe-images --repository-name $ECR_REPOSITORY --query 'imageDetails[*].imageTags' --output text --region $AWS_REGION)
+        echo "All image tags: $all_tags"
+        
+        # Extract version tags and sort them
+        sorted_tags=$(echo $all_tags | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+$' | sort -V)
+        echo "Sorted version tags: $sorted_tags"
+        
+        # Identify the latest and second latest tags
+        latest_tag=$(echo "$sorted_tags" | tail -n 1)
+        second_latest_tag=$(echo "$sorted_tags" | tail -n 2 | head -n 1)
+        
+        echo "Latest tag: $latest_tag"
+        echo "Second latest tag: $second_latest_tag"
+        
+        # Increment the second latest tag to get the new tag
+        IFS='.' read -r major minor <<< "$second_latest_tag"
+        new_tag="$major.$((minor + 1))"
+        echo "New tag: $new_tag"
         
         # Pull the latest image
-        docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$latest_image
+        docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$latest_tag
 
         # Retag the pulled image
-        new_tag="new-tag-according-to-your-needs"
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$latest_image $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$latest_tag $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
 
         # Push the renamed image to ECR
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
