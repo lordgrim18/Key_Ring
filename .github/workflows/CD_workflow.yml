@@ -1,4 +1,4 @@
-name: Deploy doker image to Amazon ECR
+name: cd
 
 on:
   workflow_run:
