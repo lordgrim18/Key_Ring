@@ -1,0 +1,67 @@
+name: Deploy to Amazon ECR
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}                   
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}           
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Pull the latest image from Amazon ECR
+      id: pull-latest
+      run: |
+        # Retrieve the latest image tag
+        latest_image=$(aws ecr describe-images --repository-name $ECR_REPOSITORY --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' --output text --region $AWS_REGION)
+        echo "Latest image tag: $latest_image"
+        
+        # Pull the latest image
+        docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$latest_image
+
+        # Retag the pulled image
+        new_tag="new-tag-according-to-your-needs"
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$latest_image $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
+
+        # Push the renamed image to ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
+
+    - name: Build, tag, and push new image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build a new Docker image
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+        # Tag the new image as latest
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+        # Push the new image and the latest tag to ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
