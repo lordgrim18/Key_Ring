@@ -31,7 +31,9 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Move to the directory containing the Dockerfile
-      run: cd ./app/Key-Ring
+      run: |
+        cd ~
+        cd ./app/Key-Ring
 
     - name: Update git branch
       run: git pull origin prod
