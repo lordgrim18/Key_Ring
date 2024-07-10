@@ -7,9 +7,14 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
 
     strategy:
       matrix:
@@ -22,8 +27,17 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: |
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Create .env file
+      run: |
         touch .env
         echo "${{ secrets.DEV_ENV_FILE }}" > .env
-    - run: npm test
+
+    - name: Verify .env file creation
+      run: ls -la
+    
+    - name: Run tests
+      run: npm test
