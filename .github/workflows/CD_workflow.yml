@@ -32,7 +32,9 @@ jobs:
 
     - name: Move to the directory containing the Dockerfile
       run: |
-        cd ~
+        cd ..
+        cd ..
+        cd ..
         cd ./app/Key-Ring
 
     - name: Update git branch
