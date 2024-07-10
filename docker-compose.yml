@@ -12,9 +12,8 @@ services:
 
   mongo:
     image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    env_file:
+      - ./.env
     volumes:
       - mongo-data:/data/db
 
