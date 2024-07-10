@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "prod" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "prod" ]
 
 jobs:
   test:
@@ -35,9 +35,6 @@ jobs:
       run: |
         touch .env
         echo "${{ secrets.DEV_ENV_FILE }}" > .env
-
-    - name: Verify .env file creation
-      run: ls -la
     
     - name: Run tests
       run: npm test
