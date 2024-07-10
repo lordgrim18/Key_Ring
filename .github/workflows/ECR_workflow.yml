@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECR
+name: Deploy doker image to Amazon ECR
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Pull the latest image from Amazon ECR
+    - name: Rename image with latest latest tag in Amazon ECR
       id: pull-latest
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -45,22 +45,20 @@ jobs:
         echo "Sorted version tags: $sorted_tags"
         
         # Identify the latest and second latest tags
-        latest_tag=$(echo "$sorted_tags" | tail -n 1)
-        second_latest_tag=$(echo "$sorted_tags" | tail -n 2 | head -n 1)
+        numbered_latest_tag=$(echo "$sorted_tags" | tail -n 1)
         
-        echo "Latest tag: $latest_tag"
-        echo "Second latest tag: $second_latest_tag"
+        echo "Latest tag: $numbered_latest_tag"
         
         # Increment the second latest tag to get the new tag
-        IFS='.' read -r major minor <<< "$second_latest_tag"
+        IFS='.' read -r major minor <<< "$numbered_latest_tag"
         new_tag="$major.$((minor + 1))"
         echo "New tag: $new_tag"
         
         # Pull the latest image
-        docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$latest_tag
+        docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
         # Retag the pulled image
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$latest_tag $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
 
         # Push the renamed image to ECR
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$new_tag
