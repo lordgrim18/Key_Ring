@@ -30,15 +30,21 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Add SSH Key
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-
-    - name: SSH into EC2 and deploy
+    - name: Build & Deploy
+      env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOSTNAME: ${{ secrets.EC2_PUBLIC_IP }}
+          USER_NAME: ${{ secrets.EC2_USER_NAME }}
+    
       run: |
-        ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-          cd /path/to/your/project
-          git pull origin prod
-          make deploy
-        EOF
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+
+            # Now we have got the access of EC2 and we will start the deploy .
+            cd /home/ubuntu/app/Key-Ring &&
+            git checkout prod &&
+            git fetch --all &&
+            git reset --hard origin/prod &&
+            git pull origin prod &&
+            make deploy
+            '
